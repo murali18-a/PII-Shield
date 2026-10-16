@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PII-Shield</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="logo">
+        <span class="shield-icon">🛡️</span>
+        <h1>PII-Shield</h1>
+      </div>
+      <div class="status" id="status-indicator">
+        <span class="status-dot" id="status-dot"></span>
+        <span id="status-text">Checking...</span>
+      </div>
+    </header>
+
+    <!-- Toggle -->
+    <div class="toggle-section">
+      <label class="toggle-label" for="enable-toggle">
+        Protection Enabled
+      </label>
+      <label class="toggle-switch">
+        <input type="checkbox" id="enable-toggle" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-section">
+      <div class="stat-card">
+        <span class="stat-value" id="stat-redacted">0</span>
+        <span class="stat-label">Entities Redacted</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value" id="stat-requests">0</span>
+        <span class="stat-label">Requests Protected</span>
+      </div>
+    </div>
+
+    <!-- Recent Detections -->
+    <div class="detections-section">
+      <h2>Recent Detections</h2>
+      <ul id="detections-list" class="detections-list">
+        <li class="empty-state">No detections yet</li>
+      </ul>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <span>v0.1.0</span>
+      <a href="#" id="settings-link">Settings</a>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

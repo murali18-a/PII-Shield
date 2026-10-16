@@ -1,0 +1,62 @@
+[
+  {
+    "id": "synth_001",
+    "description": "Multiple structured PII types",
+    "text": "Hi, I'm Jane Doe. My email is jane.doe@example.com, SSN 123-45-6789, and phone (555) 987-6543.",
+    "expected_entities": ["EMAIL_ADDRESS", "US_SSN", "PHONE_NUMBER"]
+  },
+  {
+    "id": "synth_002",
+    "description": "Credit card and IP address",
+    "text": "Payment from card 4111-1111-1111-1111 was processed from IP 10.0.0.42.",
+    "expected_entities": ["CREDIT_CARD", "IP_ADDRESS"]
+  },
+  {
+    "id": "synth_003",
+    "description": "AWS access key in code snippet",
+    "text": "Set your AWS key: AKIAIOSFODNN7EXAMPLE and configure the region.",
+    "expected_entities": ["AWS_ACCESS_KEY"]
+  },
+  {
+    "id": "synth_004",
+    "description": "No PII — clean technical text",
+    "text": "The function accepts two parameters: a list of integers and a boolean flag for verbose output.",
+    "expected_entities": []
+  },
+  {
+    "id": "synth_005",
+    "description": "Mixed PII with natural language",
+    "text": "Dear John Smith, your appointment is on 12/15/2026. Please confirm at john.smith@hospital.org or call 555-234-5678.",
+    "expected_entities": ["DATE_OF_BIRTH", "EMAIL_ADDRESS", "PHONE_NUMBER"]
+  },
+  {
+    "id": "synth_006",
+    "description": "Multiple SSNs in a list",
+    "text": "Employee records: Alice 987-65-4321, Bob 456-78-9012, Carol 321-54-6789.",
+    "expected_entities": ["US_SSN"]
+  },
+  {
+    "id": "synth_007",
+    "description": "JWT token in API context",
+    "text": "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIn0.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+    "expected_entities": ["JWT_TOKEN"]
+  },
+  {
+    "id": "synth_008",
+    "description": "Prompt with embedded personal story",
+    "text": "Write a cover letter for Sarah Johnson (sarah.j@gmail.com, phone 415-555-0198) applying to Acme Corp as a software engineer.",
+    "expected_entities": ["EMAIL_ADDRESS", "PHONE_NUMBER"]
+  },
+  {
+    "id": "synth_009",
+    "description": "Dense PII paragraph",
+    "text": "Patient: Michael Brown, DOB: 03/14/1985, SSN: 234-56-7890, Phone: (312) 555-0147, Email: m.brown@clinic.net, IP logged: 172.16.254.1",
+    "expected_entities": ["DATE_OF_BIRTH", "US_SSN", "PHONE_NUMBER", "EMAIL_ADDRESS", "IP_ADDRESS"]
+  },
+  {
+    "id": "synth_010",
+    "description": "Code review prompt — no PII",
+    "text": "Can you review this Python function? It takes a DataFrame, filters rows where column 'status' equals 'active', and returns the mean of column 'score'.",
+    "expected_entities": []
+  }
+]
