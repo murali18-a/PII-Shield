@@ -19,7 +19,7 @@
 ## 1. Clone the Repository
 
 ```powershell
-git clone https://github.com/YOUR_USERNAME/PII-Shield.git
+git clone https://github.com/murali18-a/PII-Shield.git
 cd PII-Shield
 ```
 

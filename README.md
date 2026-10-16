@@ -58,7 +58,7 @@ Browser Extension ──► FastAPI Backend ──► Detection Engine ──►
 ### 1. Clone & Setup
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/PII-Shield.git
+git clone https://github.com/murali18-a/PII-Shield.git
 cd PII-Shield
 
 # Create virtual environment
