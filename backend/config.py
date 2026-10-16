@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     """Application-wide settings with safe defaults."""
 
     # ── Server ───────────────────────────────────
-    VERSION: str = "0.1.0"
+    VERSION: str = "0.2.0"
     HOST: str = "127.0.0.1"
     PORT: int = 8000
     DEBUG: bool = True
@@ -21,14 +21,19 @@ class Settings(BaseSettings):
     ALLOWED_ORIGINS: str = "http://localhost:5173"
 
     # ── Presidio / spaCy ─────────────────────────
-    SPACY_MODEL: str = "en_core_web_lg"
+    SPACY_MODEL: str = "en_core_web_sm"
     PRESIDIO_SCORE_THRESHOLD: float = 0.5
+
+    # ── Input limits ─────────────────────────────
+    MAX_INPUT_LENGTH: int = 50_000  # Max characters in a single request
+    MAX_BATCH_SIZE: int = 10  # Max texts in a batch request (future)
 
     # ── Session ──────────────────────────────────
     SESSION_TTL_SECONDS: int = 3600
 
     # ── Audit ────────────────────────────────────
     AUDIT_DB_URL: str = "sqlite:///./audit.db"
+    MAX_AUDIT_EVENTS: int = 10_000  # Max in-memory events before rotation
 
     # ── Policy ───────────────────────────────────
     DEFAULT_POLICY_PROFILE: str = "default"

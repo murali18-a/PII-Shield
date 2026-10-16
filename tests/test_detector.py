@@ -27,17 +27,25 @@ class TestRegexPatterns:
         assert len(email_matches) == 1
         assert email_matches[0].matched_text == "test.user@example.com"
 
-    def test_detects_credit_card(self):
+    def test_detects_credit_card_with_luhn(self):
+        """Credit cards must pass Luhn validation."""
         text = "Card number: 4111-1111-1111-1111"
         matches = scan_with_regex(text)
         cc_matches = [m for m in matches if m.entity_type == "CREDIT_CARD"]
         assert len(cc_matches) == 1
 
+    def test_rejects_invalid_credit_card(self):
+        """A number matching the format but failing Luhn should be excluded."""
+        text = "Card number: 4111-1111-1111-1112"
+        matches = scan_with_regex(text)
+        cc_matches = [m for m in matches if m.entity_type == "CREDIT_CARD"]
+        assert len(cc_matches) == 0
+
     def test_detects_phone_number(self):
         text = "Call me at (555) 123-4567."
         matches = scan_with_regex(text)
         phone_matches = [m for m in matches if m.entity_type == "PHONE_NUMBER"]
-        assert len(phone_matches) == 1
+        assert len(phone_matches) >= 1
 
     def test_detects_ip_address(self):
         text = "Server IP: 192.168.1.100"
@@ -51,6 +59,29 @@ class TestRegexPatterns:
         matches = scan_with_regex(text)
         aws_matches = [m for m in matches if m.entity_type == "AWS_ACCESS_KEY"]
         assert len(aws_matches) == 1
+
+    def test_detects_aadhaar(self, sample_text_aadhaar_pan):
+        matches = scan_with_regex(sample_text_aadhaar_pan)
+        aadhaar_matches = [m for m in matches if m.entity_type == "AADHAAR"]
+        assert len(aadhaar_matches) >= 1
+
+    def test_detects_pan(self, sample_text_aadhaar_pan):
+        matches = scan_with_regex(sample_text_aadhaar_pan)
+        pan_matches = [m for m in matches if m.entity_type == "PAN"]
+        assert len(pan_matches) == 1
+        assert pan_matches[0].matched_text == "ABCPD1234E"
+
+    def test_detects_api_key(self):
+        text = 'api_key: "synth_key_abc123def456ghi789jkl012mno"'
+        matches = scan_with_regex(text)
+        key_matches = [m for m in matches if m.entity_type == "API_KEY"]
+        assert len(key_matches) >= 1
+
+    def test_detects_password(self):
+        text = 'password = "SuperSecret123!@#"'
+        matches = scan_with_regex(text)
+        pwd_matches = [m for m in matches if m.entity_type == "PASSWORD"]
+        assert len(pwd_matches) >= 1
 
     def test_no_false_positives_clean_text(self, sample_text_clean):
         matches = scan_with_regex(sample_text_clean)

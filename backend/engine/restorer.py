@@ -19,8 +19,8 @@ class RestorationResult:
     placeholders_restored: int
 
 
-# Matches placeholders like <PERSON_1>, <US_SSN_2>, <EMAIL_ADDRESS_1>
-_PLACEHOLDER_RE = re.compile(r"<[A-Z][A-Z0-9_]*_\d+>")
+# Matches placeholders like [PERSON_1], [US_SSN_2], [EMAIL_ADDRESS_1]
+_PLACEHOLDER_RE = re.compile(r"\[[A-Z][A-Z0-9_]*_\d+\]")
 
 
 class Restorer:

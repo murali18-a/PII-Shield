@@ -37,3 +37,30 @@ def sample_text_clean() -> str:
         "The weather today is sunny with a high of 75 degrees. "
         "Python is a popular programming language used in data science."
     )
+
+
+@pytest.fixture
+def sample_text_aadhaar_pan() -> str:
+    """Synthetic text with Indian identity formats."""
+    return (
+        "My Aadhaar number is 2345 6789 0123 and "
+        "my PAN is ABCPD1234E. Please process my application."
+    )
+
+
+@pytest.fixture
+def sample_text_secrets() -> str:
+    """Synthetic text with API keys and passwords."""
+    return (
+        'config = {"api_key": "synth_key_abc123def456ghi789jkl012mno", '
+        'password: "SuperSecret123!@#"}'
+    )
+
+
+@pytest.fixture
+def sample_text_repeated() -> str:
+    """Synthetic text where the same PII value appears multiple times."""
+    return (
+        "Contact jane.doe@example.com for the report. "
+        "If jane.doe@example.com is unavailable, try another address."
+    )

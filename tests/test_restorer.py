@@ -13,8 +13,8 @@ class TestRestorer:
 
     def test_restore_single_placeholder(self):
         restorer = Restorer()
-        mapping = {"<PERSON_1>": "Jane Doe"}
-        text = "Hello, <PERSON_1>!"
+        mapping = {"[PERSON_1]": "Jane Doe"}
+        text = "Hello, [PERSON_1]!"
         result = restorer.restore(text, mapping)
 
         assert isinstance(result, RestorationResult)
@@ -24,11 +24,11 @@ class TestRestorer:
     def test_restore_multiple_placeholders(self):
         restorer = Restorer()
         mapping = {
-            "<PERSON_1>": "Jane Doe",
-            "<US_SSN_1>": "123-45-6789",
-            "<EMAIL_ADDRESS_1>": "jane@example.com",
+            "[PERSON_1]": "Jane Doe",
+            "[US_SSN_1]": "123-45-6789",
+            "[EMAIL_ADDRESS_1]": "jane@example.com",
         }
-        text = "<PERSON_1>'s SSN is <US_SSN_1>. Email: <EMAIL_ADDRESS_1>."
+        text = "[PERSON_1]'s SSN is [US_SSN_1]. Email: [EMAIL_ADDRESS_1]."
         result = restorer.restore(text, mapping)
 
         assert "Jane Doe" in result.restored_text
@@ -39,8 +39,8 @@ class TestRestorer:
     def test_restore_repeated_placeholder(self):
         """Same placeholder appearing multiple times in response."""
         restorer = Restorer()
-        mapping = {"<PERSON_1>": "Jane Doe"}
-        text = "<PERSON_1> said hello. Later, <PERSON_1> left."
+        mapping = {"[PERSON_1]": "Jane Doe"}
+        text = "[PERSON_1] said hello. Later, [PERSON_1] left."
         result = restorer.restore(text, mapping)
 
         assert result.restored_text == "Jane Doe said hello. Later, Jane Doe left."
@@ -57,7 +57,7 @@ class TestRestorer:
     def test_restore_missing_placeholder_in_text(self):
         """Mapping has entries but none appear in the text."""
         restorer = Restorer()
-        mapping = {"<PERSON_1>": "Jane Doe"}
+        mapping = {"[PERSON_1]": "Jane Doe"}
         text = "No matching placeholders."
         result = restorer.restore(text, mapping)
 

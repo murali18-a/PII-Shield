@@ -5,7 +5,7 @@ Generates deterministic placeholders for detected entities and
 produces the sanitised text. Returns the placeholder mapping
 for later restoration.
 
-Placeholder format: <ENTITY_TYPE_N>  e.g. <PERSON_1>, <SSN_2>
+Placeholder format: [ENTITY_TYPE_N]  e.g. [PERSON_1], [EMAIL_ADDRESS_1], [AADHAAR_1]
 """
 
 from __future__ import annotations
@@ -42,6 +42,11 @@ class Redactor:
 
     The mapping from placeholder to original value is returned as part of
     the RedactionResult and should be stored in the session store (in-memory only).
+
+    Handles:
+    - Multiple entities of the same type (numbered sequentially)
+    - Repeated identical values (same value gets same placeholder)
+    - Overlapping spans (assumed pre-deduplicated by Detector)
     """
 
     def redact(self, text: str, entities: list[DetectedEntity]) -> RedactionResult:
@@ -62,6 +67,8 @@ class Redactor:
                 placeholders=[],
             )
 
+        # Track seen values: if the same text appears twice, reuse the placeholder
+        value_to_placeholder: dict[tuple[str, str], str] = {}
         # Count occurrences per entity type for numbering
         type_counter: dict[str, int] = {}
         mapping: dict[str, str] = {}
@@ -72,10 +79,16 @@ class Redactor:
 
         for entity in entities:
             et = entity.entity_type
-            type_counter[et] = type_counter.get(et, 0) + 1
-            placeholder = f"<{et}_{type_counter[et]}>"
+            key = (et, entity.matched_text)
 
-            mapping[placeholder] = entity.matched_text
+            if key in value_to_placeholder:
+                # Reuse placeholder for repeated identical value
+                placeholder = value_to_placeholder[key]
+            else:
+                type_counter[et] = type_counter.get(et, 0) + 1
+                placeholder = f"[{et}_{type_counter[et]}]"
+                value_to_placeholder[key] = placeholder
+                mapping[placeholder] = entity.matched_text
 
             info = PlaceholderInfo(
                 entity_type=et,

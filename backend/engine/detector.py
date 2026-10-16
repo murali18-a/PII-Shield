@@ -48,6 +48,9 @@ class Detector:
         Returns:
             List of DetectedEntity objects sorted by start position.
         """
+        if not text:
+            return []
+
         entities: list[DetectedEntity] = []
 
         # ── Pass 1: Regex patterns ──────────────────
@@ -88,6 +91,9 @@ class Detector:
         """
         Remove overlapping detections, keeping the one with the highest score.
         When scores are equal, prefer regex (more precise for structured data).
+
+        Uses a greedy interval-scheduling approach: sort by start, then for
+        overlapping spans keep the higher-scoring one.
         """
         if not entities:
             return []
