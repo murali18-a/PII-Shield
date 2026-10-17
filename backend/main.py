@@ -31,19 +31,19 @@ audit_logger = AuditLogger(max_events=settings.MAX_AUDIT_EVENTS)
 async def lifespan(app: FastAPI):
     """Application lifespan: startup and shutdown hooks."""
     # ── Startup ──────────────────────────────────────
-    print(f"🛡️  PII-Shield v{settings.VERSION} starting on {settings.HOST}:{settings.PORT}")
+    print(f"[PII-Shield] v{settings.VERSION} starting on {settings.HOST}:{settings.PORT}")
     presidio_wrapper.load()
     if presidio_wrapper.is_loaded:
-        print(f"✅ Presidio loaded with spaCy model '{settings.SPACY_MODEL}'")
+        print(f"[PII-Shield] Presidio loaded with spaCy model '{settings.SPACY_MODEL}'")
     else:
         print(
-            f"⚠️  Presidio could not load model '{settings.SPACY_MODEL}'. "
+            f"[PII-Shield] WARNING: Presidio could not load model '{settings.SPACY_MODEL}'. "
             f"Detection will use regex-only fallback. "
             f"Error: {presidio_wrapper.load_error}"
         )
     yield
     # ── Shutdown ─────────────────────────────────────
-    print("🛡️  PII-Shield shutting down")
+    print("[PII-Shield] Shutting down")
 
 
 app = FastAPI(
@@ -54,10 +54,13 @@ app = FastAPI(
 )
 
 # ── CORS ────────────────────────────────────────────
+# Safe to use ["*"] because the server binds to 127.0.0.1 only.
+# This allows the Chrome extension, file:// demo page, and Vite
+# dashboard to call the API without individual origin allowlisting.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.allowed_origins_list,
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )

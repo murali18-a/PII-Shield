@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PII-Shield — Admin Dashboard</title>
+  <meta name="description" content="Privacy-safe admin dashboard for PII-Shield local guardrail">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='28' font-size='28'>🛡️</text></svg>">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <span class="brand-icon">🛡️</span>
+        <div>
+          <h1>PII-Shield</h1>
+          <span class="version">v0.2.0</span>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="#" class="nav-item active" data-tab="overview">
+          <span>📊</span> Overview
+        </a>
+        <a href="#" class="nav-item" data-tab="events">
+          <span>📋</span> Audit Events
+        </a>
+        <a href="#" class="nav-item" data-tab="policy">
+          <span>⚙️</span> Policy Config
+        </a>
+        <a href="#" class="nav-item" data-tab="test">
+          <span>🧪</span> Quick Test
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="conn-indicator" id="sidebar-conn">
+          <span class="conn-dot" id="sidebar-dot"></span>
+          <span id="sidebar-status">Checking…</span>
+        </div>
+        <p class="local-notice">🔒 All data stays local</p>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Overview Tab -->
+      <section class="tab-content active" id="tab-overview">
+        <div class="page-header">
+          <h2>Dashboard Overview</h2>
+          <button class="btn btn-sm" id="refresh-btn">🔄 Refresh</button>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-grid" id="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon">🔍</div>
+            <div class="stat-body">
+              <span class="stat-value" id="total-detections">—</span>
+              <span class="stat-label">Total Detections</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🛡️</div>
+            <div class="stat-body">
+              <span class="stat-value" id="total-redacted">—</span>
+              <span class="stat-label">Redacted</span>
+            </div>
+          </div>
+          <div class="stat-card warn-card">
+            <div class="stat-icon">⚠️</div>
+            <div class="stat-body">
+              <span class="stat-value" id="total-warned">—</span>
+              <span class="stat-label">Warned</span>
+            </div>
+          </div>
+          <div class="stat-card danger-card">
+            <div class="stat-icon">🚫</div>
+            <div class="stat-body">
+              <span class="stat-value" id="total-blocked">—</span>
+              <span class="stat-label">Blocked</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="charts-row">
+          <div class="chart-card">
+            <h3>Category Breakdown</h3>
+            <div class="category-bars" id="category-bars">
+              <div class="empty-chart">No data yet — run some scans first</div>
+            </div>
+          </div>
+          <div class="chart-card">
+            <h3>Action Distribution</h3>
+            <div class="action-donut" id="action-donut">
+              <div class="empty-chart">No data yet</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Events Preview -->
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3>Recent Audit Events</h3>
+            <a href="#" class="view-all" data-tab="events">View All →</a>
+          </div>
+          <div class="events-preview" id="events-preview">
+            <div class="empty-chart">No audit events recorded yet</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Events Tab -->
+      <section class="tab-content" id="tab-events">
+        <div class="page-header">
+          <h2>Audit Events</h2>
+          <div class="header-actions">
+            <span class="event-count" id="event-count">0 events</span>
+            <button class="btn btn-sm" id="events-refresh-btn">🔄 Refresh</button>
+          </div>
+        </div>
+        <div class="events-note">
+          Events contain only entity types and counts — never raw text or PII values.
+        </div>
+        <div class="events-table-wrap">
+          <table class="events-table" id="events-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Time</th>
+                <th>Entity Types</th>
+                <th>Count</th>
+                <th>Policy</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="events-tbody">
+              <tr><td colspan="6" class="empty-row">No events yet</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="pagination" id="pagination"></div>
+      </section>
+
+      <!-- Policy Tab -->
+      <section class="tab-content" id="tab-policy">
+        <div class="page-header">
+          <h2>Policy Configuration</h2>
+        </div>
+        <div class="policy-grid">
+          <div class="policy-card" id="policy-default">
+            <div class="policy-header">
+              <h3>Default</h3>
+              <span class="policy-badge active-badge">Active</span>
+            </div>
+            <p class="policy-desc">Balanced protection. Redacts sensitive identifiers and secrets. Warns on dates and passports.</p>
+            <div class="policy-rules">
+              <div class="rule-group">
+                <h4>🛡️ Always Redact</h4>
+                <div class="rule-tags" id="default-redact-tags"></div>
+              </div>
+              <div class="rule-group">
+                <h4>⚠️ Warn Only</h4>
+                <div class="rule-tags" id="default-warn-tags"></div>
+              </div>
+              <div class="rule-group">
+                <h4>🚫 Block</h4>
+                <div class="rule-tags" id="default-block-tags"><span class="tag tag-muted">None</span></div>
+              </div>
+              <div class="rule-meta">
+                <span>Min Score: <strong>0.5</strong></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="policy-card" id="policy-strict">
+            <div class="policy-header">
+              <h3>Strict</h3>
+              <span class="policy-badge">Available</span>
+            </div>
+            <p class="policy-desc">Maximum protection. Blocks high-risk identifiers entirely. Redacts everything else including names and locations.</p>
+            <div class="policy-rules">
+              <div class="rule-group">
+                <h4>🛡️ Always Redact</h4>
+                <div class="rule-tags" id="strict-redact-tags"></div>
+              </div>
+              <div class="rule-group">
+                <h4>🚫 Block</h4>
+                <div class="rule-tags" id="strict-block-tags"></div>
+              </div>
+              <div class="rule-meta">
+                <span>Min Score: <strong>0.3</strong></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="policy-card" id="policy-permissive">
+            <div class="policy-header">
+              <h3>Permissive</h3>
+              <span class="policy-badge">Available</span>
+            </div>
+            <p class="policy-desc">Light protection. Redacts only critical secrets. Warns on emails and phones. Allows locations and dates.</p>
+            <div class="policy-rules">
+              <div class="rule-group">
+                <h4>🛡️ Always Redact</h4>
+                <div class="rule-tags" id="permissive-redact-tags"></div>
+              </div>
+              <div class="rule-group">
+                <h4>⚠️ Warn Only</h4>
+                <div class="rule-tags" id="permissive-warn-tags"></div>
+              </div>
+              <div class="rule-group">
+                <h4>✅ Allowed Through</h4>
+                <div class="rule-tags" id="permissive-allow-tags"></div>
+              </div>
+              <div class="rule-meta">
+                <span>Min Score: <strong>0.7</strong></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Quick Test Tab -->
+      <section class="tab-content" id="tab-test">
+        <div class="page-header">
+          <h2>Quick Test</h2>
+        </div>
+        <div class="test-layout">
+          <div class="test-input-section">
+            <label for="test-text">Enter text to scan:</label>
+            <textarea id="test-text" rows="5" placeholder="Type or paste text with synthetic PII…"></textarea>
+            <div class="test-controls">
+              <select id="test-policy">
+                <option value="default">Default Policy</option>
+                <option value="strict">Strict Policy</option>
+                <option value="permissive">Permissive Policy</option>
+              </select>
+              <button class="btn btn-primary" id="test-btn">🔍 Scan</button>
+            </div>
+          </div>
+          <div class="test-results" id="test-results">
+            <div class="empty-chart">Results will appear here</div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script type="module" src="/main.js"></script>
+</body>
+</html>

@@ -16,7 +16,7 @@
       </div>
       <div class="status" id="status-indicator">
         <span class="status-dot" id="status-dot"></span>
-        <span id="status-text">Checking...</span>
+        <span id="status-text">Checking…</span>
       </div>
     </header>
 
@@ -29,6 +29,22 @@
         <input type="checkbox" id="enable-toggle" checked>
         <span class="slider"></span>
       </label>
+    </div>
+
+    <!-- Engine Info -->
+    <div class="engine-info" id="engine-info" style="display:none">
+      <div class="info-row">
+        <span class="info-label">Engine</span>
+        <span class="info-value" id="engine-type">—</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Model</span>
+        <span class="info-value" id="engine-model">—</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Sessions</span>
+        <span class="info-value" id="engine-sessions">—</span>
+      </div>
     </div>
 
     <!-- Stats -->
@@ -51,10 +67,25 @@
       </ul>
     </div>
 
+    <!-- Actions -->
+    <div class="actions-section">
+      <a href="demo/demo.html" target="_blank" class="action-link" id="demo-link">
+        🧪 Open Demo Page
+      </a>
+      <a href="#" class="action-link" id="dashboard-link">
+        📊 Open Dashboard
+      </a>
+    </div>
+
+    <!-- Privacy -->
+    <div class="privacy-bar">
+      🔒 All processing is local. No data leaves your machine.
+    </div>
+
     <!-- Footer -->
     <footer class="footer">
-      <span>v0.1.0</span>
-      <a href="#" id="settings-link">Settings</a>
+      <span>v0.2.0</span>
+      <span>IBM Z Datathon 2026</span>
     </footer>
   </div>
 

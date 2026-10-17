@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PII-Shield — Demo</title>
+  <link rel="stylesheet" href="demo.css">
+</head>
+<body>
+  <div class="app">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="brand">
+        <span class="brand-icon">🛡️</span>
+        <div>
+          <h1>PII-Shield <span class="badge">Demo</span></h1>
+          <p class="subtitle">Local-first privacy guardrail for LLM prompts</p>
+        </div>
+      </div>
+      <div class="connection" id="connection-status">
+        <span class="conn-dot" id="conn-dot"></span>
+        <span id="conn-text">Checking backend…</span>
+      </div>
+    </header>
+
+    <!-- Privacy Notice -->
+    <div class="privacy-notice" id="privacy-notice">
+      <strong>🔒 Privacy Notice:</strong>
+      All detection and redaction happens <em>locally</em> on your machine via the PII-Shield backend at
+      <code>127.0.0.1:8000</code>. No text is ever sent to an external server. The original-to-placeholder
+      mapping exists only in memory and is never logged or stored to disk.
+    </div>
+
+    <!-- Backend Offline Warning -->
+    <div class="offline-warning" id="offline-warning" style="display:none">
+      <strong>⚠️ Backend Unavailable</strong>
+      <p>The PII-Shield backend is not running. Start it with:</p>
+      <code>python -m uvicorn backend.main:app --host 127.0.0.1 --port 8000</code>
+      <button class="btn btn-sm" id="retry-btn">Retry Connection</button>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-grid">
+      <!-- Left: Input -->
+      <section class="panel input-panel">
+        <div class="panel-header">
+          <h2>📝 Enter Prompt</h2>
+          <div class="policy-select">
+            <label for="policy">Policy:</label>
+            <select id="policy">
+              <option value="default">Default</option>
+              <option value="strict">Strict</option>
+              <option value="permissive">Permissive</option>
+            </select>
+          </div>
+        </div>
+        <textarea id="input-text" placeholder="Type or paste a prompt containing synthetic PII…&#10;&#10;Example: My name is Jane Doe, email jane@example.com, SSN 123-45-6789, Aadhaar 2345 6789 0123, PAN ABCPD1234E" rows="8"></textarea>
+        <div class="input-footer">
+          <span class="char-count" id="char-count">0 / 50,000</span>
+          <div class="btn-group">
+            <button class="btn btn-secondary" id="load-sample-btn">Load Sample</button>
+            <button class="btn btn-primary" id="analyze-btn" disabled>
+              <span class="btn-icon">🔍</span> Analyze
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right: Results -->
+      <section class="panel results-panel" id="results-panel">
+        <div class="panel-header">
+          <h2>📊 Analysis Results</h2>
+          <span class="action-badge" id="overall-action" style="display:none"></span>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" id="empty-state">
+          <span class="empty-icon">🔎</span>
+          <p>Enter a prompt and click <strong>Analyze</strong> to scan for PII</p>
+        </div>
+
+        <!-- Loading -->
+        <div class="loading" id="loading" style="display:none">
+          <div class="spinner"></div>
+          <p>Scanning for PII…</p>
+        </div>
+
+        <!-- Detection Results -->
+        <div class="results-content" id="results-content" style="display:none">
+          <!-- Stats Row -->
+          <div class="stats-row">
+            <div class="stat-mini">
+              <span class="stat-num" id="stat-detections">0</span>
+              <span class="stat-lbl">Detections</span>
+            </div>
+            <div class="stat-mini">
+              <span class="stat-num" id="stat-categories">0</span>
+              <span class="stat-lbl">Categories</span>
+            </div>
+            <div class="stat-mini">
+              <span class="stat-num" id="stat-time">0</span>
+              <span class="stat-lbl">ms</span>
+            </div>
+          </div>
+
+          <!-- Detections List -->
+          <div class="detections-box">
+            <h3>Detected Entities</h3>
+            <div class="detections-list" id="detections-list"></div>
+          </div>
+
+          <!-- Highlighted Original -->
+          <div class="highlight-box">
+            <h3>Highlighted Text</h3>
+            <div class="highlighted-text" id="highlighted-text"></div>
+          </div>
+
+          <!-- Sanitize Button -->
+          <button class="btn btn-accent btn-full" id="sanitize-btn">
+            <span class="btn-icon">🛡️</span> Sanitize &amp; Preview
+          </button>
+        </div>
+
+        <!-- Sanitized Preview -->
+        <div class="sanitized-content" id="sanitized-content" style="display:none">
+          <div class="sanitized-box">
+            <h3>✅ Sanitized Prompt (safe to send)</h3>
+            <pre class="sanitized-text" id="sanitized-text"></pre>
+          </div>
+          <div class="session-info">
+            <span>Session: <code id="session-id"></code></span>
+            <span class="disclaimer" id="disclaimer-text"></span>
+          </div>
+
+          <!-- Confirmation step -->
+          <div class="confirm-section">
+            <p class="confirm-msg">This sanitized text is safe to copy into any LLM. The original values stay local.</p>
+            <div class="btn-group">
+              <button class="btn btn-secondary" id="copy-btn">📋 Copy Sanitized</button>
+              <button class="btn btn-secondary" id="new-scan-btn">🔄 New Scan</button>
+            </div>
+          </div>
+
+          <!-- Local-only Restore Test -->
+          <details class="restore-section">
+            <summary>🧪 Local Restore Test (never used with external LLMs)</summary>
+            <p class="restore-note">This tests that placeholders can be reversed locally. In production, restoration is a separate authorized step — the mapping is never exposed to the LLM.</p>
+            <textarea id="restore-input" rows="3" placeholder="Paste LLM response with placeholders here…"></textarea>
+            <button class="btn btn-sm" id="restore-btn">Restore Locally</button>
+            <pre class="restored-text" id="restored-text" style="display:none"></pre>
+          </details>
+        </div>
+
+        <!-- Block State -->
+        <div class="block-content" id="block-content" style="display:none">
+          <div class="block-box">
+            <span class="block-icon">🚫</span>
+            <h3>Request Blocked</h3>
+            <p id="block-reason"></p>
+            <p class="block-note">The strict policy blocks prompts containing high-risk PII. Switch to the <strong>default</strong> policy to redact instead.</p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <span>PII-Shield v0.2.0 — IBM Z Datathon 2026</span>
+      <span>All processing is local. No data leaves your machine.</span>
+    </footer>
+  </div>
+
+  <script src="demo.js"></script>
+</body>
+</html>

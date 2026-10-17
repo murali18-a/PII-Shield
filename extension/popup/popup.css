@@ -26,7 +26,7 @@
 
 body {
   width: 340px;
-  min-height: 420px;
+  min-height: 440px;
   font-family: var(--font);
   background: var(--bg-primary);
   color: var(--text-primary);
@@ -37,7 +37,7 @@ body {
   padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
 }
 
 /* ── Header ───────────────────────────────── */
@@ -151,6 +151,25 @@ body {
   transform: translateX(20px);
 }
 
+/* ── Engine Info ──────────────────────────── */
+
+.engine-info {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 3px 0;
+  font-size: 11px;
+}
+
+.info-label { color: var(--text-secondary); }
+.info-value { color: var(--text-primary); font-weight: 500; }
+
 /* ── Stats ────────────────────────────────── */
 
 .stats-section {
@@ -198,7 +217,7 @@ body {
   background: var(--bg-secondary);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  max-height: 140px;
+  max-height: 110px;
   overflow-y: auto;
 }
 
@@ -232,26 +251,58 @@ body {
   letter-spacing: 0.3px;
 }
 
+/* ── Actions ──────────────────────────────── */
+
+.actions-section {
+  display: flex;
+  gap: 8px;
+}
+
+.action-link {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.action-link:hover {
+  background: #2a3148;
+  border-color: rgba(79, 195, 247, 0.3);
+}
+
+/* ── Privacy Bar ──────────────────────────── */
+
+.privacy-bar {
+  background: rgba(79, 195, 247, 0.08);
+  border: 1px solid rgba(79, 195, 247, 0.15);
+  border-radius: var(--radius);
+  padding: 8px 12px;
+  font-size: 10px;
+  color: var(--accent);
+  text-align: center;
+}
+
 /* ── Footer ───────────────────────────────── */
 
 .footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 11px;
+  font-size: 10px;
   color: var(--text-secondary);
   padding-top: 4px;
   border-top: 1px solid var(--border);
-}
-
-.footer a {
-  color: var(--accent);
-  text-decoration: none;
-  transition: opacity 0.2s;
-}
-
-.footer a:hover {
-  opacity: 0.8;
 }
 
 /* ── Scrollbar ────────────────────────────── */

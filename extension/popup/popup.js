@@ -2,7 +2,7 @@
  * PII-Shield — Extension Popup Script
  *
  * Manages the popup UI: toggle state, backend health check,
- * and display of recent detection stats.
+ * engine info display, and stats from session storage.
  */
 
 const API_BASE = 'http://127.0.0.1:8000/api/v1';
@@ -15,12 +15,27 @@ const enableToggle = document.getElementById('enable-toggle');
 const statRedacted = document.getElementById('stat-redacted');
 const statRequests = document.getElementById('stat-requests');
 const detectionsList = document.getElementById('detections-list');
+const engineInfo = document.getElementById('engine-info');
+const engineType = document.getElementById('engine-type');
+const engineModel = document.getElementById('engine-model');
+const engineSessions = document.getElementById('engine-sessions');
+const dashboardLink = document.getElementById('dashboard-link');
 
 // ── Initialisation ──────────────────────────────
 
 document.addEventListener('DOMContentLoaded', async () => {
   await loadToggleState();
   await checkBackendHealth();
+  await updateStats();
+
+  // Dashboard link opens the dashboard HTML (served by backend or locally)
+  if (dashboardLink) {
+    dashboardLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      // Open the Vite dev server or fallback to a local file
+      chrome.tabs.create({ url: 'http://127.0.0.1:5173' });
+    });
+  }
 });
 
 // ── Toggle ──────────────────────────────────────
@@ -59,12 +74,18 @@ async function checkBackendHealth() {
     if (response.ok) {
       const data = await response.json();
       statusDot.className = 'status-dot connected';
-      statusText.textContent = 'Backend connected';
 
-      // Update stats if available
       if (data.presidio_loaded) {
         statusText.textContent = 'Engine ready';
+        engineType.textContent = 'Presidio + Regex';
+      } else {
+        statusText.textContent = 'Regex-only mode';
+        engineType.textContent = 'Regex only';
       }
+
+      engineModel.textContent = data.spacy_model || '—';
+      engineSessions.textContent = data.active_sessions || 0;
+      engineInfo.style.display = 'block';
     } else {
       setDisconnected();
     }
@@ -76,41 +97,39 @@ async function checkBackendHealth() {
 function setDisconnected() {
   statusDot.className = 'status-dot disconnected';
   statusText.textContent = 'Backend offline';
+  engineInfo.style.display = 'none';
 }
 
 // ── Stats Display ───────────────────────────────
 
-/**
- * Update the popup stats from session storage.
- * Stats are accumulated by the content script / service worker.
- */
 async function updateStats() {
-  const result = await chrome.storage.session.get([
-    'totalRedacted',
-    'totalRequests',
-    'recentDetections',
-  ]);
+  try {
+    const result = await chrome.storage.session.get([
+      'totalRedacted',
+      'totalRequests',
+      'recentDetections',
+    ]);
 
-  statRedacted.textContent = result.totalRedacted || 0;
-  statRequests.textContent = result.totalRequests || 0;
+    statRedacted.textContent = result.totalRedacted || 0;
+    statRequests.textContent = result.totalRequests || 0;
 
-  // Update detections list
-  const detections = result.recentDetections || [];
-  if (detections.length === 0) {
-    detectionsList.innerHTML = '<li class="empty-state">No detections yet</li>';
-  } else {
-    detectionsList.innerHTML = detections
-      .slice(0, 10) // Show last 10
-      .map(
-        (d) =>
-          `<li>
-            <span>${d.count} entit${d.count === 1 ? 'y' : 'ies'}</span>
-            <span class="entity-badge">${d.type}</span>
-          </li>`
-      )
-      .join('');
+    // Update detections list
+    const detections = result.recentDetections || [];
+    if (detections.length === 0) {
+      detectionsList.innerHTML = '<li class="empty-state">No detections yet</li>';
+    } else {
+      detectionsList.innerHTML = detections
+        .slice(0, 10)
+        .map(
+          (d) =>
+            `<li>
+              <span>${d.count} entit${d.count === 1 ? 'y' : 'ies'}</span>
+              <span class="entity-badge">${d.type}</span>
+            </li>`
+        )
+        .join('');
+    }
+  } catch {
+    // session storage might not be available
   }
 }
-
-// Update stats on popup open
-updateStats();

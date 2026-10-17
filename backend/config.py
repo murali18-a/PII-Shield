@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     LOG_LEVEL: str = "info"
 
     # ── CORS ─────────────────────────────────────
-    ALLOWED_ORIGINS: str = "http://localhost:5173"
+    ALLOWED_ORIGINS: str = "http://localhost:5173,http://127.0.0.1:5173,null,chrome-extension://*"
 
     # ── Presidio / spaCy ─────────────────────────
     SPACY_MODEL: str = "en_core_web_sm"
