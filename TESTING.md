@@ -66,7 +66,7 @@ python -m tests.test_evaluation
 python -m tests.test_evaluation
 ```
 
-This runs all 10 synthetic prompts through the detection engine and reports:
+This runs all 14 synthetic prompts through the detection engine and reports:
 - Per-prompt: expected vs detected entity types
 - Aggregate: true/false positives/negatives
 - Precision, Recall, F1 score
@@ -79,7 +79,7 @@ All test data is **synthetic** — no real PII is ever used.
 
 ### Synthetic Prompts (`data/synthetic_prompts.json`)
 
-10 crafted prompts covering:
+14 crafted prompts covering:
 
 | ID | Description | Entity Types |
 |----|-------------|-------------|
@@ -93,6 +93,10 @@ All test data is **synthetic** — no real PII is ever used.
 | synth_008 | Cover letter prompt | EMAIL, PHONE |
 | synth_009 | Dense PII paragraph | DATE, SSN, PHONE, EMAIL, IP |
 | synth_010 | Code review (no PII) | — |
+| synth_011 | Indian identity formats | AADHAAR, PAN, EMAIL |
+| synth_012 | Password and API key | PASSWORD, API_KEY |
+| synth_013 | Repeated email address | EMAIL |
+| synth_014 | Mixed credit card and SSN | CREDIT_CARD, US_SSN |
 
 ### Test Fixtures (`tests/conftest.py`)
 
@@ -122,33 +126,36 @@ The integration test suite includes specific security verification:
 
 ## Evaluation Results
 
-Latest evaluation on the 10-prompt synthetic test set:
+Latest evaluation on the 14-prompt synthetic test set:
 
 ```
 Engine: Presidio + Regex
 Model: en_core_web_sm
 
-Precision: 59.26%
-Recall:    88.89%
-F1 Score:  71.11%
+Precision: 66.67%
+Recall:    92.31%
+F1 Score:  77.42%
 
-True positives:  16
-False positives: 11
+True positives:  24
+False positives: 12
 False negatives:  2
 True negatives:   1
 ```
 
 **Analysis:**
-- **High recall (88.89%)**: The engine catches most PII. The 2 false
+- **High recall (92.31%)**: The engine catches most PII. The 2 false
   negatives are DATE_OF_BIRTH entries — Presidio returns these as
-  DATE_TIME (a different label).
-- **Lower precision (59.26%)**: Presidio's NER aggressively detects
+  DATE_TIME (a different label). The dates ARE detected, just under
+  a different type name.
+- **Lower precision (66.67%)**: Presidio's NER aggressively detects
   PERSON and ORGANIZATION entities that weren't in the expected set.
   These are actually *protective false positives* — over-redaction
   that errs on the side of privacy.
 - **True negatives**: Both clean prompts are correctly identified
   in regex-only mode; with Presidio, one gets a false ORGANIZATION
   detection.
+- **Sample size**: 14 synthetic prompts. Results should not be
+  presented as representative of enterprise-scale traffic.
 
 ---
 

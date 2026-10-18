@@ -7,7 +7,7 @@
 ## Slide 1: Title
 
 - **PII-Shield**: Local-First Privacy Guardrail for LLM Interactions
-- IBM Z Datathon 2026
+- IBM Z Datathon 2026 — "AI Secured: Innovation Without Exposure"
 - Team / Author name
 
 ---
@@ -69,18 +69,20 @@
 
 ## Slide 7: Evaluation
 
-- 10-prompt synthetic test set
-- **Recall: 88.89%** — catches most PII
-- **Precision: 59.26%** — protective over-detection (names, orgs)
-- **F1: 71.11%**
+- 14-prompt synthetic test set
+- **Recall: 92.31%** — catches most PII
+- **Precision: 66.67%** — protective over-detection (names, orgs)
+- **F1: 77.42%**
 - 102 automated tests pass (unit + integration + edge cases)
 - Security-specific tests: mapping leakage, audit privacy, session consumption
+- 8 live API validation tests: all pass
+- **Limitation**: Small sample size, not representative of enterprise traffic
 
 ---
 
 ## Slide 8: IBM Z / LinuxONE Relevance
 
-- **Local mode**: Individual privacy protection (current)
+- **Local mode**: Individual privacy protection (current implementation)
 - **Enterprise mode**: Backend deployed on LinuxONE as centralized privacy gateway
 - Why LinuxONE?
   - Hardware encryption (CPACF) for session data
@@ -96,14 +98,15 @@
 - Clean text → 0 detections
 - Personal info → 5+ detections, sanitized output
 - Strict policy → request blocked
-- Round-trip: sanitize → (simulated LLM) → restore
+- Round-trip: sanitize → (simulated LLM response) → restore
+- Dashboard: audit events with no PII visible
 
 ---
 
 ## Slide 10: What's Implemented vs. Future Work
 
 | Implemented | Scaffold / Future |
-|-------------|------------------|
+|-------------|-------------------|
 | Regex + Presidio detection engine | Content script DOM interception |
 | Sanitize/restore round-trip API | TLS, authentication |
 | Policy engine (3 profiles) | Persistent audit database |
