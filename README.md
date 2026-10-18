@@ -183,13 +183,13 @@ See [docs/THREAT_MODEL.md](docs/THREAT_MODEL.md) and [SECURITY.md](SECURITY.md) 
 
 ## Evaluation Results
 
-On a 10-prompt synthetic test set:
+On a 14-prompt synthetic test set:
 
 | Metric | Value |
 |--------|-------|
-| **Precision** | 59.26% |
-| **Recall** | 88.89% |
-| **F1 Score** | 71.11% |
+| **Precision** | 66.67% |
+| **Recall** | 92.31% |
+| **F1 Score** | 77.42% |
 
 - High recall: catches most structured PII (SSN, email, CC, keys)
 - Lower precision: Presidio NER produces protective false positives (PERSON, ORGANIZATION)
