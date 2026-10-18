@@ -60,7 +60,8 @@ if (-not $BackendOnly) {
     $NpmPath = Join-Path $Root "dashboard"
     if (Test-Path (Join-Path $NpmPath "package.json")) {
         Write-Host "▶ Starting dashboard on http://localhost:5173 ..." -ForegroundColor Green
-        $dashboard = Start-Process -FilePath "npx" -ArgumentList "vite", "--host", "127.0.0.1" -WorkingDirectory $NpmPath -PassThru -NoNewWindow
+        $npxCmd = if ($IsWindows -or $env:OS -like "*Windows*") { "npx.cmd" } else { "npx" }
+        $dashboard = Start-Process -FilePath $npxCmd -ArgumentList "vite", "--host", "127.0.0.1" -WorkingDirectory $NpmPath -PassThru -NoNewWindow
         Write-Host "✅ Dashboard starting" -ForegroundColor Green
     } else {
         Write-Host "⚠️  Dashboard package.json not found, skipping" -ForegroundColor Yellow
