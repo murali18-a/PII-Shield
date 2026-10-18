@@ -1,0 +1,39 @@
+1
+00:00:01,000 --> 00:00:08,000
+PII-Shield: Local-First Privacy Guardrail for Enterprise LLM Prompts.
+
+2
+00:00:08,500 --> 00:00:16,000
+IBM Z Datathon 2026 — Theme: AI Secured: Innovation Without Exposure.
+
+3
+00:00:17,000 --> 00:00:25,000
+Connecting Chrome Extension to local engine at 127.0.0.1:8000. Engine ready.
+
+4
+00:00:26,000 --> 00:00:35,000
+Testing Clean Prompt Baseline: Technical query yields 0 false detections.
+
+5
+00:00:36,000 --> 00:00:46,000
+Testing Employee Onboarding Record containing Name, Aadhaar, PAN, and Email.
+
+6
+00:00:47,000 --> 00:00:57,000
+Analysis detects all PII entities in 33 milliseconds via hybrid Presidio + Regex engine.
+
+7
+00:00:58,000 --> 00:01:10,000
+Sanitizing prompt: PII replaced with tokenized placeholders ([PERSON_1], [AADHAAR_1]).
+
+8
+00:01:11,000 --> 00:01:22,000
+Sanitized prompt is safe to send to external LLMs. Original data never leaves the client.
+
+9
+00:01:23,000 --> 00:01:34,000
+Local Restoration: Model responses with placeholders are reversed purely in local memory.
+
+10
+00:01:35,000 --> 00:01:48,000
+Admin Dashboard: Real-time overview of detections, privacy-preserving audit logs, and policy controls.

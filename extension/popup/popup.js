@@ -20,6 +20,7 @@ const engineType = document.getElementById('engine-type');
 const engineModel = document.getElementById('engine-model');
 const engineSessions = document.getElementById('engine-sessions');
 const dashboardLink = document.getElementById('dashboard-link');
+const demoLink = document.getElementById('demo-link');
 
 // ── Initialisation ──────────────────────────────
 
@@ -27,6 +28,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadToggleState();
   await checkBackendHealth();
   await updateStats();
+
+  // Demo page link opens the extension demo page
+  if (demoLink) {
+    demoLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      chrome.tabs.create({ url: chrome.runtime.getURL('demo/demo.html') });
+    });
+  }
 
   // Dashboard link opens the dashboard HTML (served by backend or locally)
   if (dashboardLink) {
