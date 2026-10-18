@@ -1,6 +1,6 @@
 [project]
 name = "pii-shield"
-version = "0.1.0"
+version = "0.2.0"
 description = "Local-first privacy guardrail — detect and redact PII before it reaches external LLMs."
 readme = "README.md"
 license = {text = "MIT"}

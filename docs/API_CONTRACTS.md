@@ -1,6 +1,6 @@
 # PII-Shield — API Contracts
 
-> Version: 0.1.0 | Last Updated: 2026-10-16
+> Version: 0.2.0 | Last Updated: 2026-10-18
 
 ---
 
@@ -18,16 +18,17 @@ None required. The backend runs locally and binds to `127.0.0.1` only.
 
 ## Endpoints
 
-### 1. `POST /redact`
+### 1. `POST /analyze`
 
-Detect and redact PII from user text.
+Detect PII in text and return categories, scores, and policy decisions
+**without** redacting or storing anything.
 
 **Request Body:**
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| `text` | `string` | ✅ | Raw text to scan (1–50,000 chars) |
-| `policy_profile` | `string` | ❌ | Policy profile name (default: `"default"`) |
+| `text` | `string` | Yes | Raw text to scan (1–50,000 chars) |
+| `policy_profile` | `string` | No | Policy profile name (default: `"default"`) |
 
 ```json
 {
@@ -38,60 +39,107 @@ Detect and redact PII from user text.
 
 **Response (200):**
 
-| Field | Type | Description |
-|---|---|---|
-| `sanitized_text` | `string` | Text with PII replaced by placeholders |
-| `session_id` | `string` | UUID for retrieving the mapping later |
-| `detections` | `array` | List of detected entities |
-| `detections[].entity_type` | `string` | Entity type (e.g., `PERSON`, `US_SSN`) |
-| `detections[].placeholder` | `string` | Placeholder token (e.g., `<PERSON_1>`) |
-| `detections[].start` | `integer` | Start offset in original text |
-| `detections[].end` | `integer` | End offset in original text |
-| `detections[].score` | `float` | Confidence score (0.0–1.0) |
-| `detections[].source` | `string` | Detection method: `regex` or `presidio` |
-| `stats.total_entities` | `integer` | Total entities detected |
-| `stats.processing_time_ms` | `float` | Processing time in milliseconds |
+```json
+{
+  "detections": [
+    {
+      "entity_type": "US_SSN",
+      "placeholder": "[US_SSN_0]",
+      "start": 38,
+      "end": 49,
+      "score": 1.0,
+      "source": "regex",
+      "action": "REDACT",
+      "reason": "Entity type 'US_SSN' is always redacted under 'default' policy"
+    }
+  ],
+  "categories_found": ["US_SSN"],
+  "overall_action": "REDACT",
+  "total_detections": 1,
+  "processing_time_ms": 12.5,
+  "disclaimer": "Detection is best-effort. Confidence scores are estimates and not a guarantee of accuracy."
+}
+```
+
+---
+
+### 2. `POST /sanitize`
+
+Detect PII, replace with placeholders, and return sanitized text.
+Stores the mapping in-memory for later restoration.
+
+**Request Body:**
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `text` | `string` | Yes | Raw text to scan (1–50,000 chars) |
+| `policy_profile` | `string` | No | Policy profile (default: `"default"`) |
+
+**Response (200):**
 
 ```json
 {
-  "sanitized_text": "My name is <PERSON_1> and my SSN is <US_SSN_1>.",
+  "sanitized_text": "My name is John Smith and my SSN is [US_SSN_1].",
   "session_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
   "detections": [
     {
-      "entity_type": "PERSON",
-      "placeholder": "<PERSON_1>",
-      "start": 11,
-      "end": 21,
-      "score": 0.95,
-      "source": "presidio"
-    },
-    {
       "entity_type": "US_SSN",
-      "placeholder": "<US_SSN_1>",
-      "start": 35,
-      "end": 46,
+      "placeholder": "[US_SSN_1]",
+      "start": 38,
+      "end": 49,
       "score": 1.0,
-      "source": "regex"
+      "source": "regex",
+      "action": "REDACT",
+      "reason": "Entity type 'US_SSN' is always redacted under 'default' policy"
     }
   ],
-  "stats": {
-    "total_entities": 2,
-    "processing_time_ms": 42.5
+  "categories_found": ["US_SSN"],
+  "overall_action": "REDACT",
+  "total_detections": 1,
+  "processing_time_ms": 15.3,
+  "disclaimer": "Detection is best-effort. Some PII may not be caught."
+}
+```
+
+**Error (422) — Blocked by Policy:**
+
+```json
+{
+  "detail": {
+    "error": "request_blocked",
+    "message": "Request blocked by 'strict' policy. Blocked entity types: ['US_SSN']",
+    "blocked_types": ["US_SSN"]
   }
 }
 ```
 
-**Error Responses:**
-
-| Status | Condition |
-|---|---|
-| `422` | Validation error (empty text, text too long) |
-| `501` | Engine not yet implemented (Phase 0 stub) |
-| `500` | Internal server error |
+> **Security note:** The placeholder-to-original mapping is NEVER included
+> in the response. It exists only in the in-memory session store.
 
 ---
 
-### 2. `POST /restore`
+### 3. `POST /redact`
+
+Backward-compatible alias for `/sanitize` with a simpler response schema.
+
+**Request/Response:** Same as `/sanitize` but with `stats` instead of
+individual fields:
+
+```json
+{
+  "sanitized_text": "...",
+  "session_id": "...",
+  "detections": [...],
+  "stats": {
+    "total_entities": 2,
+    "processing_time_ms": 15.3
+  }
+}
+```
+
+---
+
+### 4. `POST /restore`
 
 Restore placeholders in LLM response text to original values.
 
@@ -99,12 +147,12 @@ Restore placeholders in LLM response text to original values.
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| `text` | `string` | ✅ | Text containing placeholders (1–100,000 chars) |
-| `session_id` | `string` | ✅ | Session ID from redact response |
+| `text` | `string` | Yes | Text with placeholders (1–100,000 chars) |
+| `session_id` | `string` | Yes | Session ID from sanitize/redact response |
 
 ```json
 {
-  "text": "Sure, <PERSON_1>! Your SSN <US_SSN_1> is valid.",
+  "text": "Sure, [PERSON_1]! Your SSN [US_SSN_1] is valid.",
   "session_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
 }
 ```
@@ -118,64 +166,23 @@ Restore placeholders in LLM response text to original values.
 }
 ```
 
-**Error Responses:**
+**Error (404):** Session not found or expired.
 
-| Status | Condition |
-|---|---|
-| `404` | Session not found or expired |
-| `422` | Validation error |
-| `501` | Engine not yet implemented (Phase 0 stub) |
+> **Note:** Sessions are single-use. After restoration, the session
+> is deleted and cannot be used again.
 
 ---
 
-### 3. `GET /health`
+### 5. `GET /events`
 
-Service health and readiness check.
-
-**Response (200):**
-
-```json
-{
-  "status": "healthy",
-  "version": "0.1.0",
-  "presidio_loaded": true,
-  "spacy_model": "en_core_web_lg"
-}
-```
-
----
-
-### 4. `GET /audit/stats`
-
-Aggregate redaction statistics. **No PII is ever returned.**
-
-**Response (200):**
-
-```json
-{
-  "total_requests": 1024,
-  "total_entities_redacted": 3891,
-  "entities_by_type": {
-    "PERSON": 1200,
-    "EMAIL_ADDRESS": 890,
-    "US_SSN": 401
-  },
-  "requests_last_24h": 87
-}
-```
-
----
-
-### 5. `GET /audit/events`
-
-Paginated audit events. **No PII is ever returned.**
+Paginated, privacy-safe audit events.
 
 **Query Parameters:**
 
 | Param | Type | Default | Description |
 |---|---|---|---|
-| `page` | `integer` | `1` | Page number |
-| `page_size` | `integer` | `20` | Items per page |
+| `page` | `integer` | `1` | Page number (1-indexed) |
+| `page_size` | `integer` | `20` | Events per page (1–100) |
 
 **Response (200):**
 
@@ -184,17 +191,64 @@ Paginated audit events. **No PII is ever returned.**
   "events": [
     {
       "id": "evt_abc123def456",
-      "timestamp": "2026-10-16T22:30:00Z",
-      "entity_types": ["PERSON", "EMAIL_ADDRESS"],
+      "timestamp": "2026-10-18T12:30:00+00:00",
+      "entity_types": ["PERSON", "US_SSN"],
       "entity_count": 3,
       "policy_profile": "default",
-      "action": "redacted"
+      "action": "REDACT"
     }
   ],
+  "total_events": 42,
   "page": 1,
-  "total_pages": 10
+  "page_size": 20
 }
 ```
+
+> **Security note:** Events contain only entity types and counts.
+> No raw text, PII values, or mappings are ever included.
+
+---
+
+### 6. `GET /health`
+
+Service health and readiness check. Available at both `/health` and `/api/v1/health`.
+
+**Response (200):**
+
+```json
+{
+  "status": "healthy",
+  "version": "0.2.0",
+  "presidio_loaded": true,
+  "spacy_model": "en_core_web_sm",
+  "active_sessions": 3,
+  "note": ""
+}
+```
+
+---
+
+## Placeholder Format
+
+Placeholders use **square brackets** with sequential numbering:
+
+```
+[ENTITY_TYPE_N]
+```
+
+Examples: `[PERSON_1]`, `[US_SSN_1]`, `[EMAIL_ADDRESS_2]`, `[AADHAAR_1]`
+
+Repeated identical values receive the same placeholder.
+
+---
+
+## Policy Profiles
+
+| Profile | Description |
+|---------|-------------|
+| `default` | Redacts structured PII. Warns on dates/passports. |
+| `strict` | Redacts everything. **Blocks** SSN, credit card, Aadhaar. |
+| `permissive` | Redacts high-risk only. Warns on email/phone. Skips locations. |
 
 ---
 
@@ -202,9 +256,19 @@ Paginated audit events. **No PII is ever returned.**
 
 | Setting | Value |
 |---|---|
-| Allowed Origins | `chrome-extension://<ID>`, `http://localhost:5173` |
+| Allowed Origins | `*` (safe because server binds to 127.0.0.1 only) |
 | Allowed Methods | All (`*`) |
 | Allowed Headers | All (`*`) |
-| Credentials | `true` |
+| Credentials | `false` |
 
-Configure via `ALLOWED_ORIGINS` in `.env`.
+---
+
+## Error Responses
+
+All errors follow FastAPI's standard error format:
+
+| Status | Condition |
+|---|---|
+| `422` | Validation error or request blocked by policy |
+| `404` | Session not found or expired |
+| `500` | Internal server error |

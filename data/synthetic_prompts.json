@@ -58,5 +58,29 @@
     "description": "Code review prompt — no PII",
     "text": "Can you review this Python function? It takes a DataFrame, filters rows where column 'status' equals 'active', and returns the mean of column 'score'.",
     "expected_entities": []
+  },
+  {
+    "id": "synth_011",
+    "description": "Indian identity formats — Aadhaar and PAN",
+    "text": "Applicant details: Aadhaar 2345 6789 0123, PAN ABCPD1234E, email applicant@example.in.",
+    "expected_entities": ["AADHAAR", "PAN", "EMAIL_ADDRESS"]
+  },
+  {
+    "id": "synth_012",
+    "description": "Password in config context",
+    "text": "Update config: password: \"SuperSecret123!@#\" and api_key: \"synth_key_abc123def456ghi789jkl012mno\".",
+    "expected_entities": ["PASSWORD", "API_KEY"]
+  },
+  {
+    "id": "synth_013",
+    "description": "Repeated email address",
+    "text": "Contact support@example.com for help. If support@example.com does not respond, escalate to management.",
+    "expected_entities": ["EMAIL_ADDRESS"]
+  },
+  {
+    "id": "synth_014",
+    "description": "Mixed credit card and SSN with cover letter",
+    "text": "Card: 4111-1111-1111-1111, SSN: 123-45-6789. Please draft a thank-you note.",
+    "expected_entities": ["CREDIT_CARD", "US_SSN"]
   }
 ]

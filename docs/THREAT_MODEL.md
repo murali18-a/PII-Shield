@@ -1,7 +1,7 @@
 # PII-Shield — Threat Model
 
 > **IBM Z Datathon 2026 — "AI Secured: Innovation Without Exposure"**
-> Version: 0.1.0 | Last Updated: 2026-10-16
+> Version: 0.2.0 | Last Updated: 2026-10-18
 
 ---
 
